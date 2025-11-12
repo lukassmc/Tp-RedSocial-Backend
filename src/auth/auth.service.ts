@@ -63,9 +63,11 @@ export class AuthService {
     console.log(' Usuario creado exitosamente:', user);
 
     const token = await this.generateToken(user);
+    const userResponse = this.formatUserResponse(user);
     
+  
     return {
-      user: this.formatUserResponse(user),
+      user: userResponse,
       access_token: token
     };
   }
@@ -90,13 +92,36 @@ export class AuthService {
   
     const token = await this.generateToken(user);
 
-    return {
-      user: this.formatUserResponse(user),
-      access_token: token
-    };
+    const userResponse = this.formatUserResponse(user);
+ 
+
+  return {
+    user: userResponse,
+    access_token: token
+  };
   }
 
 
+  
+  getCurrentUser(): any {
+  try {
+    const userStr = localStorage.getItem('currentUser');
+    
+    
+    if (!userStr) {
+      return null;
+    }
+    
+    return JSON.parse(userStr);
+  } catch (error) {
+    console.error('Error parsing currentUser from localStorage:', error);
+   
+    localStorage.removeItem('currentUser');
+    localStorage.removeItem('access_token');
+    return null;
+  }
+}
+   
   private async generateToken(user: any): Promise<string> {
     const payload = {
       username: user.username,
@@ -119,4 +144,11 @@ export class AuthService {
       profilePicture: user.profilePicture,
     };
   }
+
+  isAuthenticated(): boolean {
+  const token = localStorage.getItem('access_token');
+  const user = this.getCurrentUser();
+  
+  return !!(token && user);
+}
 }

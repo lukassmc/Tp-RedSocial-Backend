@@ -5,12 +5,17 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { JwtStrategy } from './strategies/jwt.strategy';
 import { AuthService } from './auth.service';
 import { UsersModule } from '../users/users.module';
+import { CloudinaryModule } from '../cloudinary/cloudinary.module'; // ← IMPORTANTE
+import { AuthController } from './auth.controller';
+
 
 @Module({
   imports: [
+
     // UsersModule para usar UsersService
     UsersModule,
-    
+
+    CloudinaryModule,
     // PassportModule para autenticación
     PassportModule,
     
@@ -26,9 +31,10 @@ import { UsersModule } from '../users/users.module';
       inject: [ConfigService],
     }),
   ],
+  controllers: [AuthController],
   providers: [
     AuthService,
-    JwtStrategy,
+    JwtStrategy, 
   ],
   exports: [AuthService],
 })
