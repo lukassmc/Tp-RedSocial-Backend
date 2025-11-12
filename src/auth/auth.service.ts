@@ -3,6 +3,7 @@ import { UserService } from '../users/users.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { JwtService } from '@nestjs/jwt';
 import * as bcrypt from 'bcrypt';
 
 @Injectable()
@@ -11,12 +12,13 @@ export class AuthService {
   constructor(
     private userService: UserService,
     private cloudinaryService: CloudinaryService,
+    private jwtService: JwtService,
   ) {}
 
   async register(registerDto: RegisterDto, profileImage?: Express.Multer.File) {
     const { email, username, password, birthdate, ...userData } = registerDto;
 
-    console.log('📝 Datos recibidos para registro:', registerDto);
+    console.log(' Datos recibidos para registro:', registerDto);
 
     const userByEmail = await this.userService.findByEmail(email);
     if (userByEmail) {
@@ -37,7 +39,7 @@ export class AuthService {
           profileImage,
           'noisy/profiles'
         );
-        console.log('📸 Imagen subida a Cloudinary:', profilePicture);
+        console.log(' Imagen subida a Cloudinary:', profilePicture);
       } catch (error) {
         console.error('Error subiendo imagen:', error);
         throw new BadRequestException('Error al subir la imagen');
@@ -54,13 +56,18 @@ export class AuthService {
       role: 'usuario',
     };
 
-    console.log('💾 Intentando crear usuario con datos:', userDataToCreate);
+    console.log(' Intentando crear usuario con datos:', userDataToCreate);
   
     const user = await this.userService.create(userDataToCreate);
 
-    console.log('✅ Usuario creado exitosamente:', user);
+    console.log(' Usuario creado exitosamente:', user);
 
-    return this.formatUserResponse(user);
+    const token = await this.generateToken(user);
+    
+    return {
+      user: this.formatUserResponse(user),
+      access_token: token
+    };
   }
 
   async login(loginDto: LoginDto) {
@@ -80,7 +87,25 @@ export class AuthService {
       throw new UnauthorizedException('Usuario o contraseña inválidos');
     }
 
-    return this.formatUserResponse(user);
+  
+    const token = await this.generateToken(user);
+
+    return {
+      user: this.formatUserResponse(user),
+      access_token: token
+    };
+  }
+
+
+  private async generateToken(user: any): Promise<string> {
+    const payload = {
+      username: user.username,
+      sub: user._id,       
+      email: user.email,
+      role: user.role      
+    };
+
+    return this.jwtService.sign(payload);
   }
 
   private formatUserResponse(user: any) {

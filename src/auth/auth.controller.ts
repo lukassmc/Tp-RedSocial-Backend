@@ -15,24 +15,12 @@ export class AuthController {
         @Body() registerDto: RegisterDto,
         @UploadedFile() profileImage?: Express.Multer.File
     ) {
-        const result = await this.authService.register(registerDto, profileImage);
-
-        return {
-            statusCode: HttpStatus.CREATED, 
-            message: 'Usuario registrado exitosamente',
-            data: result,
-        };
+         return await this.authService.register(registerDto, profileImage);
     }
 
     @Post('login')
     async login(@Body() loginDto: LoginDto) {
-        const result = await this.authService.login(loginDto);
-        
-        return {
-            statusCode: HttpStatus.OK, 
-            message: 'Login exitoso',
-            data: result,
-        };
+       return await this.authService.login(loginDto);
     }
 }
 
