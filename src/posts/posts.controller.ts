@@ -45,6 +45,7 @@ export class PostsController {
 
     @Get('my-posts')
     async findMyPosts(@Request() req){
+        console.log("👤 Usuario autenticado:", req.user);
         return await this.postsService.findByUser(req.user._id, 3);
     }
 

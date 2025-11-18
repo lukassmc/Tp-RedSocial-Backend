@@ -70,7 +70,7 @@ export class PostsService {
 
     async findByUser(userId: Types.ObjectId, limit : number = 3) : Promise<Post[]> {
         return await this.postModel
-        .find({ userId, isPlublished: true})
+        .find({ userId, isPublished: true})
         .populate('userId', 'nombre apellido username profilePicture')
         .sort({ createdAt : -1})
         .limit(limit)
