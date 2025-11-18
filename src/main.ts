@@ -8,11 +8,9 @@ async function bootstrap() {
  
   app.enableCors({
     origin:[
-      'http://localhost:4200',                    
-      'http://localhost:3000',                    
-      'https://tp-redsocial-frontend.vercel.app', 
-      'https://*.vercel.app',                     
-    ], 
+    "http://localhost:4200",
+    "https://tp-red-social-noisy.vercel.app"
+  ], 
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
