@@ -33,7 +33,7 @@ export class CreatePostDto {
 
     @IsOptional()
     @IsUrl({}, { message: 'La URL de la imagen no es valida.'})
-    imageUrl?: string;
+    imageUrl?: any;
 
     @IsOptional()
     @IsObject({ message: 'Los datos de musica no son validos.'})

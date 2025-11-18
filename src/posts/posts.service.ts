@@ -4,6 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, SortOrder } from 'mongoose';
 import { Post, PostDocument } from './schemas/post.schema';
 import { CreatePostDto } from './dto/create-post.dto';
+import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { promises } from 'dns';
 
 
@@ -11,7 +12,7 @@ import { promises } from 'dns';
 
 export class PostsService {
 
-    constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>) {}
+    constructor(@InjectModel(Post.name) private postModel: Model<PostDocument>, private cloudinaryService : CloudinaryService) {}
 
     async create(CreatePostDto: CreatePostDto, userId: Types.ObjectId): Promise<Post> {
         const postData = {
@@ -23,6 +24,25 @@ export class PostsService {
         const createdPost = new this.postModel(postData);
         return await createdPost.save();
 
+    }
+
+    async createWithImage(createPostDto: CreatePostDto, userId: Types.ObjectId, image: Express.Multer.File): Promise<Post> {
+
+        let imageUrl = '';
+
+        if (image){
+            imageUrl = await this.cloudinaryService.uploadImage(image, 'noisy/posts');
+
+        }
+        const postData = {
+            ...createPostDto,
+            userId,
+            imageUrl,
+            isPublished: true
+        }
+
+         const createdPost = new this.postModel(postData);
+        return await createdPost.save();
     }
 
     async findAll(page: number = 1, limit: number = 10, sortBy: 'date' | 'likes' = 'date'): Promise<{ posts: Post[]; total: number }>{

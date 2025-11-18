@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, Request, HttpCode, HttpStatus, ParseIntPipe } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, Request, HttpCode, HttpStatus, ParseIntPipe, UseInterceptors, UploadedFile } from '@nestjs/common'
 import { PostsService } from './posts.service'
 import { CreatePostDto } from './dto/create-post.dto'
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'
 import { Types } from 'mongoose'
 import { types } from 'util'
+import { FileInterceptor } from '@nestjs/platform-express'
 
 
 @Controller('posts')
@@ -11,12 +12,23 @@ import { types } from 'util'
 export class PostsController {
     constructor(private readonly postsService: PostsService) {}
 
+    
     @Post()
     async create(@Body() createPostDto: CreatePostDto, @Request() req){
-
+        
         return await this.postsService.create(createPostDto, req.user._id);
-
+        
     }
+    @Post('with-image')
+    @UseInterceptors(FileInterceptor('image'))
+    async createWithImage(@UploadedFile() image : Express.Multer.File,
+                        @Body() createPostDto : CreatePostDto,
+                        @Request() req){
+
+            console.log('📸 Imagen recibida:', image);
+            console.log('📝 Datos recibidos:', createPostDto);
+            return await this.postsService.createWithImage(createPostDto, req.user._id, image);
+        }
 
     @Get()
     async findAll(@Query('page', new ParseIntPipe({ optional : true})) page: number = 1,
