@@ -1,10 +1,13 @@
-import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, Request, HttpCode, HttpStatus, ParseIntPipe, UseInterceptors, UploadedFile } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, Request, HttpCode, HttpStatus, ParseIntPipe, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common'
 import { PostsService } from './posts.service'
-import { CreatePostDto } from './dto/create-post.dto'
+import { CreatePostDto, MusicDataDto } from './dto/create-post.dto'
 import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'
 import { Types } from 'mongoose'
 import { types } from 'util'
 import { FileInterceptor } from '@nestjs/platform-express'
+import { plainToInstance } from 'class-transformer'
+import { validate } from 'class-validator'
+import { error } from 'console'
 
 
 @Controller('posts')
@@ -19,6 +22,37 @@ export class PostsController {
         return await this.postsService.create(createPostDto, req.user._id);
         
     }
+    @Post()
+    async createWithMusic(@Body()body : any,  @Request() req){
+
+        let music : MusicDataDto | null = null;
+        
+        if (body.music){
+
+            const parsed = JSON.parse(body.music);
+
+            music = plainToInstance(MusicDataDto, parsed)
+
+            const errors = await validate(music)
+            if (errors.length > 0){
+                throw new BadRequestException(errors)
+            }
+        
+            
+        }
+        const dto: CreatePostDto ={
+            ...body,
+            music,
+        }
+        
+        if (!music) {
+        return await this.postsService.create(dto, req.user._id);
+    }
+
+        // 👉 Si HAY música, usar createWithMusic
+        return await this.postsService.createWithMusic(dto, req.user._id, music);
+
+}
     @Post('with-image')
     @UseInterceptors(FileInterceptor('image'))
     async createWithImage(@UploadedFile() image : Express.Multer.File,

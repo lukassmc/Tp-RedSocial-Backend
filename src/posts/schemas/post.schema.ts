@@ -35,6 +35,7 @@ export class Post {
         trackName: string;
         artistName: string;
         albumName: string;
+        artwork?: string;
     };
 }
 

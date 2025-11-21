@@ -1,6 +1,6 @@
 import { IsString, IsOptional, IsUrl, IsObject, MinLength, MaxLength, isString } from 'class-validator';
 
-class MusicDataDto {
+export class MusicDataDto {
 
     @IsString()
     trackId: string;
@@ -37,7 +37,7 @@ export class CreatePostDto {
 
     @IsOptional()
     @IsObject({ message: 'Los datos de musica no son validos.'})
-    music?: MusicDataDto;
+    music?: string;
 
 }
 

@@ -3,7 +3,7 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, SortOrder } from 'mongoose';
 import { Post, PostDocument } from './schemas/post.schema';
-import { CreatePostDto } from './dto/create-post.dto';
+import { CreatePostDto, MusicDataDto } from './dto/create-post.dto';
 import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
 import { promises } from 'dns';
 
@@ -43,6 +43,24 @@ export class PostsService {
 
          const createdPost = new this.postModel(postData);
         return await createdPost.save();
+    }
+
+    async createWithMusic(createPostDto: CreatePostDto, userId: Types.ObjectId, musicDataDto: MusicDataDto ) :Promise<Post>{
+        const postData = {
+        ...createPostDto,
+        userId,
+        isPublished: true,
+        music: {
+            trackId: musicDataDto.trackId,
+            previewUrl: musicDataDto.previewUrl,
+            trackName: musicDataDto.trackName,
+            artistName: musicDataDto.artistName,
+            albumName: musicDataDto.albumName,
+        }
+    };
+
+    const createdPost = new this.postModel(postData);
+    return await createdPost.save();
     }
 
     async findAll(page: number = 1, limit: number = 10, sortBy: 'date' | 'likes' = 'date'): Promise<{ posts: Post[]; total: number }>{
@@ -90,7 +108,7 @@ export class PostsService {
     }
     }
 
-    async addLike(postId: Types.ObjectId, userId: Types.ObjectId) : Promise<Post>{
+    async addLike(postId: Types.ObjectId, userId: Types.ObjectId){
         const post = await this.postModel.findById(postId);
 
         if (!post){
@@ -104,12 +122,15 @@ export class PostsService {
         }
 
         post.likes.push(userId);
+        await post.save();
 
-        return await post.save();
+      
+        return await this.postModel
+            .findById(postId)
+            .populate('userId', 'username profilePicture');
+}
 
-    }
-
-    async removeLike(postId: Types.ObjectId, userId: Types.ObjectId) : Promise<void>{
+    async removeLike(postId: Types.ObjectId, userId: Types.ObjectId) {
         const post = await this.postModel.findById(postId);
 
         if (!post){
@@ -117,14 +138,13 @@ export class PostsService {
         
         }
 
-        if(!post.likes.includes(userId)){
+        post.likes = post.likes.filter(id => id.toString() !== userId.toString());
 
-            throw new Error('El usuario no ha dado me gusta a esta publicación.');
-
-        }
-
-        post.likes = post.likes.filter(like => like !== userId);
         await post.save();
-    }
+
     
+        return await this.postModel
+        .findById(postId)
+        .populate('userId', 'username profilePicture');
+}
 }
