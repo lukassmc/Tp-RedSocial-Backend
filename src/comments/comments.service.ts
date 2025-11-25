@@ -3,12 +3,13 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types } from 'mongoose';
 import { ForbiddenException } from '@nestjs/common';
 import { Comment, CommentDocument } from './schemas/comments.schemas';
+import { ObjectId } from 'mongodb';
 
 @Injectable()
 export class CommentsService {
   constructor(@InjectModel(Comment.name) private commentModel: Model<CommentDocument>) {}
 
-    async create(postId: string, userId: string, content: string): Promise<Comment> {
+    async create(postId: string, userId: ObjectId, content: string): Promise<Comment> {
         const comment = new this.commentModel({ postId, userId, content });
         await comment.save();
 

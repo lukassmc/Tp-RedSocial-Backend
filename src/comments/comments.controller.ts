@@ -1,6 +1,7 @@
 import { Controller, Post, Body, Param, Get, UseGuards, Request, Query, Put } from '@nestjs/common';
 import { CommentsService } from './comments.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { Types } from 'mongoose';
 
 @Controller('comments')
 @UseGuards(JwtAuthGuard)
@@ -13,7 +14,9 @@ export class CommentsController {
     @Request() req,
     @Body('content') content: string,
   ) {
-    return this.commentsService.create(postId, req.user._id, content);
+     const userId = new Types.ObjectId(req.user.userId);
+        
+        return this.commentsService.create(postId, userId, content);
   }
 
   @Get('post/:postId')

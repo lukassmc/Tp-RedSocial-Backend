@@ -1,9 +1,10 @@
-import { Controller, Post, Body, HttpStatus, UseInterceptors, UploadedFile, UseGuards, Req } from '@nestjs/common';
+import { Controller, Post, Body, HttpStatus, UseInterceptors, UploadedFile, UseGuards, Req, Get, Request } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
+import { JwtAuthGuard } from './guards/jwt-auth.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -29,6 +30,13 @@ export class AuthController {
     async refresh(@Req() req: any) {
   
       return this.authService.refresh(req.user);
+    }
+
+    @Get('validate')
+    @UseGuards(JwtAuthGuard)
+    async validate(@Request() req: any) {
+
+      return { message: 'Token válido', user: req.user };
     }
 }
 

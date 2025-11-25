@@ -74,7 +74,7 @@ export class PostsService {
         const skip = (page - 1) * limit;
 
           const sortOptions: { [key: string]: SortOrder } = sortBy === 'likes' 
-      ? { likes: -1 as SortOrder }  // Ordenar por cantidad de likes descendente
+      ? { likes: -1 as SortOrder } 
       : { createdAt: -1 as SortOrder };
 
         const [posts, total] = await Promise.all([
@@ -94,12 +94,19 @@ export class PostsService {
     }
 
     async findByUser(userId: Types.ObjectId, limit : number = 3) : Promise<Post[]> {
-        return await this.postModel
-        .find({ userId, isPublished: true})
-        .populate('userId', 'nombre apellido username profilePicture')
-        .sort({ createdAt : -1})
-        .limit(limit)
-        .exec();
+        console.log('🔍 Buscando posts para el userId:', userId.toString());
+
+        const posts = await this.postModel
+            .find({ userId, isPublished: true})
+            .populate('userId', 'nombre apellido username profilePicture')
+            .sort({ createdAt : -1})
+            .limit(limit)
+            .exec();
+
+        // --- AÑADE ESTE SEGUNDO CONSOLE.LOG ---
+        console.log('🔍 Posts encontrados en la BD:', posts);
+
+        return posts;
     }
 
     async remove(postId: Types.ObjectId, userId: Types.ObjectId): Promise<void> {

@@ -102,6 +102,32 @@ export class AuthService {
   }
 
 
+  async validateToken(token: string): Promise<boolean> {
+    try {
+      
+      this.jwtService.verify(token);
+      return true;
+    } catch (error) {
+  
+      throw new UnauthorizedException('Token inválido o expirado.');
+    }
+  }
+
+  async refresh(user: any) {
+    const payload = {
+      username: user.username,
+      sub: user.sub, 
+      email: user.email,
+      role: user.role
+    };
+
+
+    const newToken = this.jwtService.sign(payload);
+
+    return {
+      access_token: newToken,
+    };
+  }
   
   getCurrentUser(): any {
   try {
@@ -133,21 +159,6 @@ export class AuthService {
     return this.jwtService.sign(payload, { expiresIn: '2m' }); 
   }
 
-  async refresh(user: any) {
-  
-    const payload = {
-      username: user.username,
-      sub: user.userId, 
-      email: user.email,
-      role: user.role
-    };
-
-    const newToken = this.jwtService.sign(payload);
-
-    return {
-      access_token: newToken,
-    };
-  }
   private formatUserResponse(user: any) {
     return {
       _id: user._id,
