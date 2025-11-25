@@ -9,7 +9,7 @@ export class CommentsService {
   constructor(@InjectModel(Comment.name) private commentModel: Model<CommentDocument>) {}
 
     async create(postId: string, userId: string, content: string): Promise<Comment> {
-        const comment = new this.commentModel({ post: postId, user: userId, content });
+        const comment = new this.commentModel({ postId, userId, content });
         await comment.save();
 
         return comment.populate('userId', 'nombre username profilePicture');
@@ -27,13 +27,14 @@ export class CommentsService {
   const skip = (page - 1) * limit;
 
   const comments = await this.commentModel
-    .find({ post: postId })
+    .find({ postId: postId })
+    .populate('userId', 'nombre username profilePicture')
     .sort({ createdAt: 1 }) 
     .skip(skip)
     .limit(limit)
     .lean();
 
-  const total = await this.commentModel.countDocuments({ post: postId });
+  const total = await this.commentModel.countDocuments({ postId: postId });
 
   return {
     comments,

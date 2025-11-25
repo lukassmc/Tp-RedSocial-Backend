@@ -65,7 +65,7 @@ export class PostsService {
 
     async findOne(id: Types.ObjectId) {
         return this.postModel.findById(id)
-            .populate('userId', 'username avatar')
+            .populate('userId', 'nombre username profilePicture')
             .populate('comments.user', 'username avatar')
             .exec();
     }
