@@ -130,9 +130,24 @@ export class AuthService {
       role: user.role      
     };
 
-    return this.jwtService.sign(payload);
+    return this.jwtService.sign(payload, { expiresIn: '2m' }); 
   }
 
+  async refresh(user: any) {
+  
+    const payload = {
+      username: user.username,
+      sub: user.userId, 
+      email: user.email,
+      role: user.role
+    };
+
+    const newToken = this.jwtService.sign(payload, { expiresIn: '5m' });
+
+    return {
+      access_token: newToken,
+    };
+  }
   private formatUserResponse(user: any) {
     return {
       _id: user._id,

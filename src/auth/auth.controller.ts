@@ -1,8 +1,9 @@
-import { Controller, Post, Body, HttpStatus, UseInterceptors, UploadedFile } from '@nestjs/common';
+import { Controller, Post, Body, HttpStatus, UseInterceptors, UploadedFile, UseGuards, Req } from '@nestjs/common';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { AuthService } from './auth.service';
 import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
+import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -21,6 +22,13 @@ export class AuthController {
     @Post('login')
     async login(@Body() loginDto: LoginDto) {
        return await this.authService.login(loginDto);
+    } 
+
+    @Post('refresh')
+    @UseGuards(JwtRefreshGuard)
+    async refresh(@Req() req: any) {
+  
+      return this.authService.refresh(req.user);
     }
 }
 
