@@ -8,6 +8,7 @@ import { FileInterceptor } from '@nestjs/platform-express'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
 import { error } from 'console'
+import { ObjectId } from 'mongodb'
 
 
 @Controller('posts')
@@ -18,7 +19,7 @@ export class PostsController {
     
     @Post()
     async create(@Body() createPostDto: CreatePostDto, @Request() req){
-        
+        const userId = new Types.ObjectId(req.user.userId); 
         return await this.postsService.create(createPostDto, req.user._id);
         
     }
@@ -75,8 +76,9 @@ export class PostsController {
     async findOne(
         @Param('id') id: string) {
             
-        return await this.postsService.findOne(new Types.ObjectId(id));
-    }
+        const objectId = new Types.ObjectId(id);
+        return this.postsService.findOne(objectId);
+        }
 
     @Get('user/:userId')
     async findByUser(@Param('userId') userId: string){
@@ -92,17 +94,23 @@ export class PostsController {
 
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
-    async remove(@Param('id') postId: string, @Request() req){
+    async remove(@Param('id') id: string, @Request() req){
+        const postId = new Types.ObjectId(id);
+        const userId = new Types.ObjectId(req.user.userId);
         return await this.postsService.remove(new Types.ObjectId(postId), req.user._id)
     }
 
     @Post(':id/like')
-    async addLike(@Param('id') postId: string, @Request() req){
+    async addLike(@Param('id') id: string, @Request() req){
+        const postId = new Types.ObjectId(id);
+        const userId = new Types.ObjectId(req.user.userId);
         return await this.postsService.addLike(new Types.ObjectId(postId), req.user._id);
     }
 
     @Delete(':id/like')
-    async removeLike(@Param('id') postId :string, @Request() req){
+    async removeLike(@Param('id') id :string, @Request() req){
+            const postId = new Types.ObjectId(id);
+        const userId = new Types.ObjectId(req.user.userId);
         return await this.postsService.removeLike(new Types.ObjectId(postId), req.user._id);
     }
     
