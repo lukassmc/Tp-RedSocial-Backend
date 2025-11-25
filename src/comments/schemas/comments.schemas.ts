@@ -15,6 +15,12 @@ export class Comment {
 
   @Prop({ type: String, required: true })
   content: string;
+
+  @Prop({ type: Boolean, required: false})
+  edited?: boolean = false;
+
+  @Prop({ type: Date, required: false})
+  updatedAt: Date
 }
 
 export const CommentSchema = SchemaFactory.createForClass(Comment);

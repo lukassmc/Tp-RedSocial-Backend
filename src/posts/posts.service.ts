@@ -4,7 +4,7 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model, Types, SortOrder } from 'mongoose';
 import { Post, PostDocument } from './schemas/post.schema';
 import { CreatePostDto, MusicDataDto } from './dto/create-post.dto';
-import { CloudinaryService } from 'src/cloudinary/cloudinary.service';
+import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { promises } from 'dns';
 
 
@@ -61,6 +61,13 @@ export class PostsService {
 
     const createdPost = new this.postModel(postData);
     return await createdPost.save();
+    }
+
+    async findOne(id: Types.ObjectId) {
+        return this.postModel.findById(id)
+            .populate('userId', 'username avatar')
+            .populate('comments.user', 'username avatar')
+            .exec();
     }
 
     async findAll(page: number = 1, limit: number = 10, sortBy: 'date' | 'likes' = 'date'): Promise<{ posts: Post[]; total: number }>{

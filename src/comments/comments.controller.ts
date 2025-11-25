@@ -1,13 +1,13 @@
-import { Controller, Post, Body, Param, Get, UseGuards, Request } from '@nestjs/common';
+import { Controller, Post, Body, Param, Get, UseGuards, Request, Query, Put } from '@nestjs/common';
 import { CommentsService } from './comments.service';
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
 
 @Controller('comments')
 @UseGuards(JwtAuthGuard)
 export class CommentsController {
   constructor(private readonly commentsService: CommentsService) {}
 
-  @Post(':postId')
+  @Post('post/:postId')
   async createComment(
     @Param('postId') postId: string,
     @Request() req,
@@ -16,8 +16,22 @@ export class CommentsController {
     return this.commentsService.create(postId, req.user._id, content);
   }
 
-  @Get(':postId')
-  async getComments(@Param('postId') postId: string) {
-    return this.commentsService.findByPost(postId);
+  @Get('post/:postId')
+  async getComments(
+    @Param('postId') postId: string,
+    @Query('page') page: number = 1,
+    @Query('limit') limit: number = 10,
+  ) {
+    return this.commentsService.findByPostPaginated(postId, page, limit);
+  }
+
+
+  @Put(':commentId')
+  async updateComment(
+    @Param('commentId') commentId: string,
+    @Body('content') content: string,
+    @Request() req,
+  ) {
+    return this.commentsService.update(commentId, req.user._id, content);
   }
 }

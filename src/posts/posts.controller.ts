@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, Request, HttpCode, HttpStatus, ParseIntPipe, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common'
 import { PostsService } from './posts.service'
 import { CreatePostDto, MusicDataDto } from './dto/create-post.dto'
-import { JwtAuthGuard } from 'src/auth/guards/jwt-auth.guard'
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
 import { Types } from 'mongoose'
 import { types } from 'util'
 import { FileInterceptor } from '@nestjs/platform-express'
@@ -70,6 +70,13 @@ export class PostsController {
                 @Query('sortBy') sortBy: 'date' | 'likes' = 'date'){
                     return await this.postsService.findAll(page, limit, sortBy);
                 }
+
+    @Get(':id')
+    async findOne(
+        @Param('id') id: string) {
+            
+        return await this.postsService.findOne(new Types.ObjectId(id));
+    }
 
     @Get('user/:userId')
     async findByUser(@Param('userId') userId: string){

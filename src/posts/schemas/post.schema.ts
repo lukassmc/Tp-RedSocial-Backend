@@ -21,8 +21,21 @@ export class Post {
     @Prop({ type: [{ type: Types.ObjectId, ref: 'User' }], default: [] })
     likes: Types.ObjectId[];
 
-    @Prop({ default: 0})
-    comments : number;
+    @Prop({
+        type: [
+            {
+            user: { type: Types.ObjectId, ref: 'User' },
+            text: String,
+            date: { type: Date, default: Date.now }
+            }
+        ],
+        default: []
+        })
+        comments: {
+        user: Types.ObjectId;
+        text: string;
+        date: Date;
+        }[];
 
     @Prop({ default: false})
     isPublished : boolean;
