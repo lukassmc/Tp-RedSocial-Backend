@@ -68,7 +68,8 @@ export class AuthService {
   
     return {
       user: userResponse,
-      access_token: token
+      access_token: token,
+      expiresIn: '2m'
     };
   }
 
@@ -97,7 +98,9 @@ export class AuthService {
 
   return {
     user: userResponse,
-    access_token: token
+    access_token: token,
+    expiresIn: '2m'
+
   };
   }
 
@@ -122,12 +125,16 @@ export class AuthService {
     };
 
 
-    const newToken = this.jwtService.sign(payload);
+    const tokenExpiresIn = '2m'; 
+
+    const newToken = this.jwtService.sign(payload, { expiresIn: tokenExpiresIn });
 
     return {
       access_token: newToken,
+      expiresIn: tokenExpiresIn,
     };
   }
+  
   
   getCurrentUser(): any {
   try {

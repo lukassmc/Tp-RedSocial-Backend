@@ -35,6 +35,7 @@ export class CommentsController {
     @Body('content') content: string,
     @Request() req,
   ) {
+    console.log('Usuario adjunto a req:', req.user);
     return this.commentsService.update(commentId, req.user._id, content);
   }
 }
