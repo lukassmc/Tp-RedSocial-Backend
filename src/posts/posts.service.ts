@@ -122,10 +122,6 @@ export class PostsService {
         }
         post.likes = post.likes.filter(id => id.toString() !== userId.toString());
         await post.save();
-<<<<<<< HEAD
-
-=======
->>>>>>> 4f0b24ed9f688c0eeb04d1f473b95f2f29daee2d
         return await this.postModel.findById(postId).populate('userId', 'username profilePicture');
     }
 }

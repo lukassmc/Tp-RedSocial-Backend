@@ -1,8 +1,6 @@
-<<<<<<< HEAD
+
 import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, Request, HttpCode, HttpStatus, ParseIntPipe, UseInterceptors, UploadedFile, BadRequestException, Put, Patch } from '@nestjs/common'
-=======
-import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, Request, HttpCode, HttpStatus, ParseIntPipe, UseInterceptors, UploadedFile, BadRequestException, Put } from '@nestjs/common'
->>>>>>> 4f0b24ed9f688c0eeb04d1f473b95f2f29daee2d
+
 import { PostsService } from './posts.service'
 import { CreatePostDto, MusicDataDto } from './dto/create-post.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
@@ -91,11 +89,8 @@ export class PostsController {
         return this.postsService.findOne(objectId);
     }
 
-<<<<<<< HEAD
+
     @Patch(':id/disable')
-=======
-    @Put(':id/disable')
->>>>>>> 4f0b24ed9f688c0eeb04d1f473b95f2f29daee2d
     @Roles('administrador')
     async disablePostAdmin(@Param('id') id : string, @Request() req){
         const postId= new Types.ObjectId(id)

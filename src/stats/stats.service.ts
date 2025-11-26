@@ -66,36 +66,36 @@ n
         const end = moment(endDate).endOf('day').toDate();
 
         return this.commentModel.aggregate([
-            // 1. Filtra los COMENTARIOS por rango de fechas
+            
             { $match: { createdAt: { $gte: start, $lte: end } } },
 
-            // 2. Agrupa los comentarios por postId y los cuenta
+            
             {
                 $group: {
-                    _id: '$postId', // El _id del grupo es el postId (probablemente un string)
+                    _id: '$postId', 
                     commentCount: { $sum: 1 }
                 }
             },
 
-            // --- NUEVO PASO: AÑADIR UN CAMPO PARA LA UNIÓN ---
+           
             {
                 $addFields: {
-                    // Convierte el _id (que es el postId string) a un ObjectId para que la unión funcione
+                   
                     postIdAsObjectId: { $toObjectId: '$_id' }
                 }
             },
 
-            // 3. Une con la colección de posts usando el nuevo campo
+            
             {
                 $lookup: {
                     from: 'posts',
-                    localField: 'postIdAsObjectId', // Usa el ObjectId que acabamos de crear
+                    localField: 'postIdAsObjectId',
                     foreignField: '_id',
                     as: 'postInfo'
                 }
             },
 
-            // 4. Da forma al documento final
+            
             {
                 $project: {
                     _id: 0,
