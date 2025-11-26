@@ -14,7 +14,7 @@ export class CommentsController {
     @Request() req,
     @Body('content') content: string,
   ) {
-     const userId = new Types.ObjectId(req.user.userId);
+     const userId = new Types.ObjectId(req.user._id);
         
         return this.commentsService.create(postId, userId, content);
   }

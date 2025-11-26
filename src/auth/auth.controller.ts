@@ -5,11 +5,12 @@ import { RegisterDto } from './dto/register.dto';
 import { LoginDto } from './dto/login.dto';
 import { JwtRefreshGuard } from './guards/jwt-refresh.guard';
 import { JwtAuthGuard } from './guards/jwt-auth.guard';
+import { UserService } from 'src/users/users.service';
 
 @Controller('auth')
 export class AuthController {
 
-    constructor (private authService : AuthService) {}
+    constructor (private authService : AuthService, private userService : UserService) {}
 
     @Post('register')
     @UseInterceptors(FileInterceptor('profileImage'))
@@ -23,6 +24,7 @@ export class AuthController {
     @Post('login')
     async login(@Body() loginDto: LoginDto) {
        return await this.authService.login(loginDto);
+       
     } 
 
     @Post('refresh')

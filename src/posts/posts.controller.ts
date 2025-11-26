@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, Request, HttpCode, HttpStatus, ParseIntPipe, UseInterceptors, UploadedFile, BadRequestException } from '@nestjs/common'
+import { Controller, Get, Post, Body, Param, Delete, Query, UseGuards, Request, HttpCode, HttpStatus, ParseIntPipe, UseInterceptors, UploadedFile, BadRequestException, Put, Patch } from '@nestjs/common'
 import { PostsService } from './posts.service'
 import { CreatePostDto, MusicDataDto } from './dto/create-post.dto'
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard'
@@ -6,6 +6,7 @@ import { Types } from 'mongoose'
 import { FileInterceptor } from '@nestjs/platform-express'
 import { plainToInstance } from 'class-transformer'
 import { validate } from 'class-validator'
+import { Roles } from 'src/auth/decorators/roles.decorator'
 
 @Controller('posts')
 @UseGuards(JwtAuthGuard)
@@ -14,7 +15,7 @@ export class PostsController {
 
     @Post()
     async create(@Body() createPostDto: CreatePostDto, @Request() req){
-        const userId = new Types.ObjectId(req.user.userId); 
+        const userId = new Types.ObjectId(req.user._id); 
         return await this.postsService.create(createPostDto, userId);
     }
     
@@ -36,7 +37,7 @@ export class PostsController {
             music,
         }
         
-        const userId = new Types.ObjectId(req.user.userId);
+        const userId = new Types.ObjectId(req.user._id);
 
         if (!music) {
             return await this.postsService.create(dto, userId);
@@ -52,7 +53,7 @@ export class PostsController {
                         @Request() req){
             console.log('📸 Imagen recibida:', image);
             console.log('📝 Datos recibidos:', createPostDto);
-            const userId = new Types.ObjectId(req.user.userId);
+            const userId = new Types.ObjectId(req.user._id);
             return await this.postsService.createWithImage(createPostDto, userId, image);
         }
 
@@ -63,11 +64,11 @@ export class PostsController {
                     return await this.postsService.findAll(page, limit, sortBy);
                 }
 
-    // El orden de estas rutas es CRÍTICO
+    
     @Get('my-posts')
     async findMyPosts(@Request() req){
         console.log("👤 Usuario autenticado:", req.user);
-        const userId = new Types.ObjectId(req.user.userId);
+        const userId = new Types.ObjectId(req.user._id);
         return await this.postsService.findByUser(userId, 3);
     }
 
@@ -86,25 +87,33 @@ export class PostsController {
         return this.postsService.findOne(objectId);
     }
 
+    @Patch(':id/disable')
+    @Roles('administrador')
+    async disablePostAdmin(@Param('id') id : string, @Request() req){
+        const postId= new Types.ObjectId(id)
+        return await this.postsService.adminRemove(postId);
+    }
+
+
     @Delete(':id')
     @HttpCode(HttpStatus.NO_CONTENT)
     async remove(@Param('id') id: string, @Request() req){
         const postId = new Types.ObjectId(id);
-        const userId = new Types.ObjectId(req.user.userId);
+        const userId = new Types.ObjectId(req.user._id);
         return await this.postsService.remove(postId, userId);
     }
 
     @Post(':id/like')
     async addLike(@Param('id') id: string, @Request() req){
         const postId = new Types.ObjectId(id);
-        const userId = new Types.ObjectId(req.user.userId);
+        const userId = new Types.ObjectId(req.user._id);
         return await this.postsService.addLike(postId, userId);
     }
 
     @Delete(':id/like')
     async removeLike(@Param('id') id :string, @Request() req){
         const postId = new Types.ObjectId(id);
-        const userId = new Types.ObjectId(req.user.userId);
+        const userId = new Types.ObjectId(req.user._id);
         return await this.postsService.removeLike(postId, userId);
     }
 }

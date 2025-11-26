@@ -42,6 +42,8 @@ export class User {
     @Prop({ required: true, default: Date.now })
     updatedAt : Date;
 
+    @Prop({ type: Boolean, default: true })
+    isActive: boolean;
 }
 
 export const UserSchema = SchemaFactory.createForClass(User);

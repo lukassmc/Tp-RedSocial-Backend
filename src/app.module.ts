@@ -7,6 +7,7 @@ import { PostsModule } from './posts/posts.module';
 import { MongooseModule } from '@nestjs/mongoose';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CommentsModule } from './comments/comments.module';
+import { StatsModule } from './stats/stats.module';
 
 @Module({
   imports: [
@@ -24,7 +25,8 @@ import { CommentsModule } from './comments/comments.module';
     UsersModule,
     AuthModule,
     CommentsModule,
-    PostsModule
+    PostsModule,
+    StatsModule
   ],
   controllers: [AppController],
   providers: [AppService],

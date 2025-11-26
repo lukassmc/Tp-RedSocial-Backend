@@ -1,7 +1,8 @@
-import { Injectable } from '@nestjs/common';
+import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -9,12 +10,39 @@ export class UserService {
     constructor( @InjectModel(User.name) private userModel: Model<UserDocument>) {}
 
     async create(userData : any) : Promise<User>{
-        console.log('🔧 UserService.create() - Datos recibidos:', userData);
         const newUser = new this.userModel(userData);
-        console.log('🔧 UserService.create() - Modelo creado:', newUser);
         const savedUser = await newUser.save();
-        console.log('🔧 UserService.create() - Usuario guardado:', savedUser);
         return savedUser;
+    }
+
+    async findAll(): Promise<User[]> {
+    return this.userModel.find().select('-password').exec();
+     }
+
+    async createByAdmin(userData: any): Promise<User> {
+        const hashedPassword = await bcrypt.hash(userData.password, 10);
+        const createdUser = new this.userModel({
+        ...userData,
+        password: hashedPassword,
+        birthdate: new Date(userData.birthdate),
+        });
+        return createdUser.save();
+    }
+
+    
+    async toggleActive(userIdToToggle: string, adminId: string): Promise<User> {
+       
+        if (userIdToToggle === adminId) {
+            
+            throw new ForbiddenException('No puedes deshabilitar tu propia cuenta.');
+        }
+
+        const user = await this.userModel.findById(userIdToToggle);
+        if (!user) {
+            throw new NotFoundException('Usuario no encontrado');
+        }
+        user.isActive = !user.isActive;
+        return user.save();
     }
 
     async findByEmail(email: string): Promise<User | null> {

@@ -85,6 +85,10 @@ export class AuthService {
       throw new UnauthorizedException('Usuario o contraseña inválidos');
     }
 
+    if (!user.isActive) {
+      throw new UnauthorizedException('Tu cuenta ha sido deshabilitada por un administrador.');
+    }
+
     const isPasswordValid = await bcrypt.compare(password, user.password);
     if (!isPasswordValid) {
       throw new UnauthorizedException('Usuario o contraseña inválidos');
@@ -117,6 +121,11 @@ export class AuthService {
   }
 
   async refresh(user: any) {
+    const currentUser = await this.userService.findbyId(user.sub);
+
+    if (!currentUser || !currentUser.isActive) {
+        throw new UnauthorizedException('Tu cuenta ha sido deshabilitada. Por favor, contacta a un administrador.');
+    }
     const payload = {
       username: user.username,
       sub: user.sub, 
