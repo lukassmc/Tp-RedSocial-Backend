@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { ForbiddenException, Injectable, NotFoundException } from '@nestjs/common';
+=======
+import { Injectable, NotFoundException } from '@nestjs/common';
+>>>>>>> 4f0b24ed9f688c0eeb04d1f473b95f2f29daee2d
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { User, UserDocument } from './schemas/user.schema';
@@ -30,6 +34,7 @@ export class UserService {
     }
 
     
+<<<<<<< HEAD
     async toggleActive(userIdToToggle: string, adminId: string): Promise<User> {
        
         if (userIdToToggle === adminId) {
@@ -40,6 +45,12 @@ export class UserService {
         const user = await this.userModel.findById(userIdToToggle);
         if (!user) {
             throw new NotFoundException('Usuario no encontrado');
+=======
+    async toggleActive(userId: string): Promise<User> {
+        const user = await this.userModel.findById(userId);
+        if (!user) {
+        throw new NotFoundException('Usuario no encontrado');
+>>>>>>> 4f0b24ed9f688c0eeb04d1f473b95f2f29daee2d
         }
         user.isActive = !user.isActive;
         return user.save();

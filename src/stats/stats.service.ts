@@ -61,29 +61,51 @@ export class StatsService {
     }
 
 n
-    async getCommentsPerPost(startDate: string, endDate: string) {
+        async getCommentsPerPost(startDate: string, endDate: string) {
         const start = moment(startDate).startOf('day').toDate();
         const end = moment(endDate).endOf('day').toDate();
 
-        return this.postModel.aggregate([
+        return this.commentModel.aggregate([
+            // 1. Filtra los COMENTARIOS por rango de fechas
             { $match: { createdAt: { $gte: start, $lte: end } } },
+
+            // 2. Agrupa los comentarios por postId y los cuenta
             {
-                $lookup: {
-                    from: 'comments',
-                    localField: '_id',
-                    foreignField: 'postId',
-                    as: 'postComments'
+                $group: {
+                    _id: '$postId', // El _id del grupo es el postId (probablemente un string)
+                    commentCount: { $sum: 1 }
                 }
             },
+
+            // --- NUEVO PASO: AÑADIR UN CAMPO PARA LA UNIÓN ---
+            {
+                $addFields: {
+                    // Convierte el _id (que es el postId string) a un ObjectId para que la unión funcione
+                    postIdAsObjectId: { $toObjectId: '$_id' }
+                }
+            },
+
+            // 3. Une con la colección de posts usando el nuevo campo
+            {
+                $lookup: {
+                    from: 'posts',
+                    localField: 'postIdAsObjectId', // Usa el ObjectId que acabamos de crear
+                    foreignField: '_id',
+                    as: 'postInfo'
+                }
+            },
+
+            // 4. Da forma al documento final
             {
                 $project: {
                     _id: 0,
-                    postTitle: '$title',
-                    commentCount: { $size: '$postComments' }
+                    postTitle: { $arrayElemAt: ['$postInfo.title', 0] },
+                    commentCount: 1
                 }
             },
-            { $sort: { commentCount: -1 } }, 
-            { $limit: 10 } 
+            { $sort: { commentCount: -1 } },
+            { $limit: 10 }
         ]);
     }
+
 }
