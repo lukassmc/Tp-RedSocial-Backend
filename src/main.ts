@@ -1,12 +1,14 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { Callback, Context, Handler } from 'aws-lambda';
-import serverlessExpress from '@vendia/serverless-express';
+import { ValidationPipe } from '@nestjs/common';
 
-let server: Handler;
+async function bootstrap() {
+  if (process.env.VERCEL === 'true') {
+    return;
+  }
 
-async function bootstrapServer() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create(AppModule);
+
   app.enableCors({
     origin: [
       "http://localhost:4200",
@@ -15,19 +17,14 @@ async function bootstrapServer() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true,
   });
-  await app.init();
 
-  const expressApp = app.getHttpAdapter().getInstance();
-  return serverlessExpress({ app: expressApp });
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: false,
+    transform: true,
+  }));
+
+  await app.listen(process.env.PORT ?? 3000);
 }
 
-export const handler: Handler = async (
-  event: any,
-  context: Context,
-  callback: Callback,
-) => {
-  if (!server) {
-    server = await bootstrapServer();
-  }
-  return server(event, context, callback);
-};
+bootstrap();
